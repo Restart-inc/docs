@@ -1,0 +1,42 @@
+---
+title: "Integrations Overview: REST API, Keys, and Webhooks"
+sidebarTitle: "Overview"
+description: "Connect Restart Console to your stack using the REST API, webhooks, and API key authentication to automate and extend your workflows."
+---
+
+Restart Console gives you multiple ways to integrate with external tools and automate your operations. Whether you want to trigger actions from your own backend, react to real-time system events, or query the API programmatically, the integration layer is built to fit your existing workflows without requiring custom middleware.
+
+## What's available
+
+Restart Console exposes three primary integration surfaces:
+
+- **REST API** — A fully documented HTTP API that lets you create, manage, and monitor systems programmatically. Every action available in the console UI is also available via the API.
+- **Webhooks** — Push-based event notifications delivered to your endpoint whenever something meaningful happens to a system, such as a state change or an error.
+- **API Key Authentication** — Secure, scoped credentials you generate in the console and attach to every API or webhook verification request.
+
+## Get started
+
+Choose the integration path that fits your use case, or combine them to build fully automated pipelines.
+
+<CardGroup cols={2}>
+  <Card title="Webhooks" icon="bolt" href="/integrations/webhooks">
+    Register an endpoint and receive real-time event notifications whenever your systems change state.
+  </Card>
+  <Card title="API Keys" icon="key" href="/integrations/api-keys">
+    Generate and manage API keys to authenticate programmatic requests to Restart Console.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api/introduction">
+    Explore the full REST API surface, including request schemas, response formats, and example calls.
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/help/troubleshooting">
+    Resolve common integration issues, from authentication errors to missing webhook deliveries.
+  </Card>
+</CardGroup>
+
+## How authentication works
+
+Every request to the Restart Console API must include a valid API key in the `Authorization` header. API keys are scoped at creation time, so you can issue separate keys for read-only monitoring, full management access, or webhook signature verification. See the [API Keys](/integrations/api-keys) page for instructions on generating and rotating keys.
+
+<Note>
+  Webhook payloads are signed with a secret you configure per endpoint. Always verify the signature before processing a payload. See [Verifying webhook signatures](/integrations/webhooks#verifying-webhook-signatures) for details.
+</Note>

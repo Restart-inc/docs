@@ -1,0 +1,147 @@
+---
+title: "Managing the System Lifecycle in the Restart Console"
+sidebarTitle: "Lifecycle"
+description: "Start, stop, restart, pause, and deprovision systems in Restart Console while understanding how each action moves a system through its lifecycle states."
+---
+
+Every system in Restart Console moves through a well-defined set of lifecycle states, from the moment it is provisioned to the moment it is permanently deleted. Understanding those states — and the actions that trigger transitions between them — helps you operate systems safely, recover from errors quickly, and clean up resources you no longer need.
+
+## Lifecycle State Machine
+
+A system progresses through the following states. Each row shows the state, what it means, and which actions are available from that state.
+
+| State | Meaning | Available Actions |
+|---|---|---|
+| **Provisioning** | Restart Console is allocating infrastructure and starting the system for the first time. | None — wait for transition. |
+| **Running** | All instances are healthy and serving traffic. | Stop, Restart, Pause, Deprovision |
+| **Restarting** | Restart Console is performing a rolling restart of instances. | None — wait for transition. |
+| **Paused** | The system is suspended; instances are stopped but configuration is retained. | Resume, Deprovision |
+| **Stopped** | The system has been manually stopped; no instances are running. | Start, Deprovision |
+| **Deprovisioning** | Restart Console is tearing down all infrastructure for this system. | None — this is terminal. |
+| **Deprovisioned** | All resources have been released. The system record is retained for audit purposes. | None — this is terminal. |
+
+The typical forward path through the lifecycle looks like this:
+
+```text
+Provisioning → Running → Stopped → Deprovisioned
+```
+
+From **Running**, a system can also cycle through **Restarting** and return to **Running**, or enter **Paused** for maintenance windows before resuming.
+
+## Starting a Stopped System
+
+When a system is in the **Stopped** state, you can bring it back online without reprovisioning.
+
+<Steps>
+  <Step title="Open the System Detail Page">
+    Navigate to **Systems** in the sidebar and click the name of the stopped system. The status badge reads **Stopped**.
+  </Step>
+  <Step title="Click 'Start'">
+    Click the **Start** button in the top-right action menu. Restart Console begins scheduling instances using the system's current configuration.
+  </Step>
+  <Step title="Wait for Running Status">
+    The system transitions through **Provisioning** briefly before reaching **Running**. Monitor the status badge on the Overview tab — it turns green once all instances pass their health checks.
+  </Step>
+</Steps>
+
+## Stopping a Running System
+
+Stopping a system gracefully shuts down all instances and releases compute resources. Your configuration, environment variables, and settings are preserved.
+
+On the system detail page, open the action menu in the top-right corner and select **Stop System**. Restart Console sends a `SIGTERM` signal to each instance, waits for the configurable drain period (default: 30 seconds), and then terminates any remaining processes. The system transitions to **Stopped**.
+
+<Note>
+  Stopping a system does **not** delete it or remove its configuration. You can start it again at any time. You are not billed for compute while a system is stopped, but storage and networking resources associated with the system may still accrue costs depending on your plan.
+</Note>
+
+## Restarting a System After Errors
+
+If a system enters a degraded or unhealthy state due to an application error or failed deployment, you can trigger a full rolling restart to bring it back to a clean running state.
+
+On the system detail page, open the action menu and select **Restart**. Restart Console replaces instances one at a time, waiting for each new instance to pass its health check before proceeding to the next. This keeps the system partially available throughout the restart.
+
+<Tip>
+  Before restarting, check the **Logs** tab for the most recent error messages. Restarting clears the current instance state, which can make root-cause investigation harder after the fact. Copy or export relevant log lines before triggering the restart.
+</Tip>
+
+## Pausing a System for Maintenance
+
+Pausing suspends a system's instances without fully stopping it. Use pause when you need to perform maintenance — such as a database schema migration — that requires no active traffic, but you want to resume quickly without waiting for a cold start.
+
+<Steps>
+  <Step title="Select 'Pause' from the Action Menu">
+    On the system detail page, open the action menu and choose **Pause**. Restart Console completes in-flight requests up to the drain period, then suspends all instances.
+  </Step>
+  <Step title="Perform Your Maintenance Tasks">
+    While the system is paused, complete your maintenance work. Inbound requests to the system's endpoint return a `503 Service Unavailable` response during this period.
+  </Step>
+  <Step title="Resume the System">
+    When maintenance is complete, click **Resume** in the action menu. Restart Console brings all instances back online using the current configuration. The system transitions from **Paused** back to **Running**.
+  </Step>
+</Steps>
+
+<Warning>
+  External clients and downstream services that depend on your system will receive `503` errors while it is paused. Communicate planned maintenance windows to stakeholders in advance and keep pause durations as short as possible to minimize user impact.
+</Warning>
+
+## Deprovisioning (Deleting) a System
+
+Deprovisioning permanently removes a system and releases all of its infrastructure resources. This action is irreversible.
+
+<Steps>
+  <Step title="Stop or Pause the System First">
+    Restart Console requires the system to be in a **Stopped** or **Paused** state before deprovisioning. If the system is running, stop it first using the steps above.
+  </Step>
+  <Step title="Open the Danger Zone">
+    On the system detail page, go to **Settings → General** and scroll to the **Danger Zone** section at the bottom of the page.
+  </Step>
+  <Step title="Click 'Deprovision System'">
+    Click the **Deprovision System** button. A confirmation dialog appears, asking you to type the system's name to confirm you intend to delete it.
+  </Step>
+  <Step title="Confirm Deletion">
+    Type the system name exactly as shown, then click **Confirm Deprovision**. The system transitions to **Deprovisioning** and then to **Deprovisioned** once teardown is complete.
+  </Step>
+</Steps>
+
+<Warning>
+  Deprovisioning is permanent and cannot be undone. All runtime data, logs stored within the system, and associated configuration are deleted. If you need to preserve logs beyond the system's lifetime, export them from the **Logs** tab or configure a log drain before deprovisioning.
+</Warning>
+
+## Managing Lifecycle via the API
+
+You can trigger lifecycle changes programmatically using the Restart Console REST API. Use `PUT /systems/{id}` to update a running system's configuration or change its target state, and `DELETE /systems/{id}` to deprovision a system that is already stopped or paused.
+
+### Update System Configuration or State
+
+Send a `PUT` request to `/systems/{id}` with the fields you want to change. To request a stop, set the `desired_state` field to `stopped`.
+
+```json
+{
+  "desired_state": "stopped"
+}
+```
+
+The API responds with `200 OK` and the updated system object:
+
+```json
+{
+  "id": "sys_01j8fqk2n4e5r7t9",
+  "name": "payments-api",
+  "status": "stopped",
+  "updated_at": "2024-11-12T15:10:22Z"
+}
+```
+
+### Deprovision a System
+
+Send a `DELETE` request to `/systems/{id}` to permanently remove a system. The system must be in a `stopped` or `paused` state before you can delete it.
+
+```bash
+DELETE /systems/sys_01j8fqk2n4e5r7t9
+```
+
+A successful response returns `204 No Content`. The system transitions to `deprovisioning` and then to `deprovisioned` once all infrastructure is released.
+
+<Warning>
+  The `DELETE /systems/{id}` API call is irreversible. Ensure you have exported any logs or data you need before sending this request.
+</Warning>

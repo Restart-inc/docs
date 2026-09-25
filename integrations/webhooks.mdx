@@ -1,0 +1,135 @@
+---
+title: "Webhooks: Get Real-Time System Event Notifications"
+sidebarTitle: "Webhooks"
+description: "Register an HTTPS endpoint to receive signed, real-time event notifications whenever your Restart Console systems change state or encounter errors."
+---
+
+Webhooks let your backend react to system events the moment they happen, without polling the API. When an event occurs — such as a system starting or stopping — Restart Console sends a signed HTTP POST request to the endpoint URL you register. You control the endpoint; Restart Console delivers the payload.
+
+## Register a webhook endpoint
+
+Send a `POST` request to `/v1/webhooks` with your endpoint URL and the list of event types you want to subscribe to. Include your API key in the `Authorization` header.
+
+```bash
+curl --request POST \
+  --url https://api.restartconsole.com/v1/webhooks \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "url": "https://your-app.example.com/hooks/restart",
+    "events": [
+      "system.created",
+      "system.started",
+      "system.stopped",
+      "system.errored",
+      "system.deleted"
+    ],
+    "secret": "your-signing-secret"
+  }'
+```
+
+A successful response returns a webhook object including a unique `webhook_id` you can use to update or delete the registration later.
+
+<Tip>
+  Use a dedicated path for your webhook endpoint (for example `/hooks/restart`) and keep it separate from other application routes to make signature verification and logging easier.
+</Tip>
+
+## Supported event types
+
+Restart Console emits the following events. Subscribe to only the events your integration needs to reduce noise.
+
+| Event type | Triggered when |
+|---|---|
+| `system.created` | A new system is successfully provisioned for the first time |
+| `system.started` | A system transitions from a stopped or idle state to running |
+| `system.stopped` | A system is deliberately stopped by an operator or scheduled job |
+| `system.errored` | A system encounters a runtime error and halts unexpectedly |
+| `system.deleted` | A system is permanently deleted and all resources are released |
+
+## Webhook payload format
+
+Every event delivery is a JSON object with a consistent envelope. The `data` field contains the full system object at the time the event fired.
+
+```json
+{
+  "id": "evt_01hxyz123456abcdef",
+  "type": "system.started",
+  "created_at": "2024-11-15T09:32:44Z",
+  "webhook_id": "wh_01hxyz987654fedcba",
+  "data": {
+    "system_id": "sys_01hxyzabcdef123456",
+    "name": "prod-api-gateway",
+    "status": "running",
+    "region": "us-east-1",
+    "created_at": "2024-11-10T14:20:00Z",
+    "updated_at": "2024-11-15T09:32:44Z"
+  }
+}
+```
+
+<Info>
+  The `id` field is unique per delivery attempt. If Restart Console retries a failed delivery, each attempt carries the same event `id` but a new delivery identifier. Use the event `id` to deduplicate events in your handler.
+</Info>
+
+## Verifying webhook signatures
+
+Restart Console signs every payload using HMAC-SHA256 with the secret you supplied at registration time. Verify the signature before processing any payload to ensure it originated from Restart Console and was not tampered with in transit.
+
+<Steps>
+  <Step title="Extract the signature header">
+    Read the `X-Restart-Signature` header from the incoming request. It contains a hex-encoded HMAC-SHA256 digest.
+
+    ```bash
+    X-Restart-Signature: sha256=3dbc6b2e4f1a9c...
+    ```
+  </Step>
+  <Step title="Compute the expected signature">
+    Concatenate the raw request body as a UTF-8 string. Compute an HMAC-SHA256 digest using your signing secret as the key.
+
+    ```python
+    import hmac
+    import hashlib
+
+    def compute_signature(secret: str, raw_body: bytes) -> str:
+        digest = hmac.new(
+            secret.encode("utf-8"),
+            raw_body,
+            hashlib.sha256
+        ).hexdigest()
+        return f"sha256={digest}"
+    ```
+  </Step>
+  <Step title="Compare signatures securely">
+    Use a constant-time comparison function to check that the computed signature matches the header value. Reject the request if they do not match.
+
+    ```python
+    import hmac
+
+    def verify(secret: str, raw_body: bytes, header_value: str) -> bool:
+        expected = compute_signature(secret, raw_body)
+        return hmac.compare_digest(expected, header_value)
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+  Never compare signatures with a standard equality operator (`==`). Timing-based attacks can exploit character-by-character comparisons. Always use `hmac.compare_digest` or an equivalent constant-time function in your language.
+</Warning>
+
+## Retries and error handling
+
+If your endpoint returns a non-`2xx` HTTP status code or does not respond within **10 seconds**, Restart Console treats the delivery as failed and retries automatically.
+
+| Attempt | Delay after previous attempt |
+|---|---|
+| 1 (initial) | Immediate |
+| 2 | 1 minute |
+| 3 | 10 minutes |
+| 4 | 1 hour |
+| 5 | 6 hours |
+
+After five failed attempts, Restart Console marks the delivery as **permanently failed** and stops retrying. You can view delivery history and manually replay any event from the **Webhooks** section of the console Settings.
+
+<Note>
+  Respond with a `200 OK` as quickly as possible — ideally before you begin processing the payload. Offload heavy work to a background queue to avoid timeout-induced retries.
+</Note>

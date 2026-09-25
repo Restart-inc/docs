@@ -1,0 +1,66 @@
+---
+title: "Core Concepts: Key Restart Console Terms Explained"
+sidebarTitle: "Core Concepts"
+description: "Learn the key terms used throughout Restart Console — Systems, Operators, Builders, API Keys, and Webhooks — before you start building."
+---
+
+Restart Console uses a consistent set of terms across the UI, API, and documentation. Understanding these concepts up front will help you navigate the platform confidently and communicate clearly with your team.
+
+## The building blocks
+
+Everything in Restart Console revolves around a small set of interconnected concepts. The sections below explain each one and describe how they relate to each other.
+
+### Systems
+
+A **System** is the central unit you build and manage in Restart Console. Think of it as a self-contained operational environment: it holds your configuration, resource settings, event history, and integration connections in one place. Every action in the Console — monitoring, configuration, access control — is scoped to a specific system.
+
+You can run as many systems as your plan allows, and each system is fully independent. Changes to one system never affect another.
+
+### Operators and Builders
+
+Two distinct roles interact with systems:
+
+- **Operators** run and monitor systems day-to-day. They respond to incidents, review event logs, adjust resource limits, and manage integrations.
+- **Builders** design and configure systems. They define the system's structure, set environment variables, and specify how components connect.
+
+A single user can hold both roles simultaneously, depending on the access controls set by the system owner.
+
+### The Console
+
+The **Console** is the Restart web UI, available at [app.restart.inc](https://app.restart.inc). It gives you a visual interface for every operation the platform supports — creating systems, reviewing metrics, managing team access, and more. Everything you can do in the Console is also available through the API.
+
+### API Keys and Webhooks
+
+Programmatic access relies on two mechanisms:
+
+- **API Keys** authenticate your requests to the Restart REST API. Generate and revoke keys from your account settings at any time. Treat each key as a secret — never commit it to source control.
+- **Webhooks** deliver event notifications from your systems to a URL you control. When a system changes state, triggers an error, or completes a scheduled task, Restart sends an HTTP POST to your endpoint so your tooling can react in real time.
+
+## Concept reference
+
+Use the cards below as a quick-reference index for each core concept.
+
+<CardGroup cols={2}>
+  <Card title="Systems" icon="server" href="/console/overview#systems">
+    The central operational unit — holds configuration, resources, and event history.
+  </Card>
+  <Card title="Operators" icon="user-gear" href="/console/overview#operators">
+    Users who run, monitor, and respond to events across live systems.
+  </Card>
+  <Card title="Builders" icon="screwdriver-wrench" href="/console/overview#builders">
+    Users who design, configure, and define the structure of systems.
+  </Card>
+  <Card title="Console" icon="display" href="/console/overview">
+    The Restart web UI — a visual interface for every platform operation.
+  </Card>
+  <Card title="API Keys" icon="key" href="/api/introduction#authentication">
+    Credentials that authenticate programmatic requests to the Restart REST API.
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/integrations/webhooks">
+    HTTP callbacks that push real-time system event notifications to your endpoints.
+  </Card>
+</CardGroup>
+
+<Tip>
+  If you're new to the platform, follow the [Quickstart](/quickstart) guide first. It puts these concepts into practice in a concrete, end-to-end workflow.
+</Tip>

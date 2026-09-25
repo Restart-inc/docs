@@ -1,0 +1,96 @@
+---
+title: "Manage Operators, Roles, and Permissions in Console"
+sidebarTitle: "Operators"
+description: "Invite operators, assign permission levels, audit activity logs, and remove access — everything you need to manage who can act on your systems."
+---
+
+The Operators panel gives you full control over who can interact with your systems and at what level of authority. An operator is any person — a team member, a contractor, or an automated service account — who has been explicitly granted access to your Restart Console organization. You set the scope of that access through a permission level you assign at invitation time and can adjust at any moment. Open the Operators panel by clicking **Operators** in the left navigation sidebar.
+
+## Operator roles and permission levels
+
+Restart Console uses a tiered permission model. Every operator has exactly one permission level, which determines which actions they can take across the console.
+
+| Permission level | Systems | Builders | Operators | Settings |
+|---|---|---|---|---|
+| **Viewer** | Read-only — can view dashboards and logs, no actions. | Read-only — can open and inspect configurations. | No access. | No access. |
+| **Operator** | Can start, stop, and restart systems. | Can create and save drafts; cannot publish or promote. | No access. | No access. |
+| **Builder** | Full systems access including quick actions. | Can create, publish versions, and promote to production. | No access. | No access. |
+| **Admin** | Full access, including bulk actions. | Full access. | Can invite, edit, and remove operators. | Full access. |
+| **Owner** | Unrestricted access across the entire organization. | Unrestricted access. | Can transfer ownership and manage all operators. | Unrestricted, including billing. |
+
+<Info>
+  Each organization has exactly one **Owner**. The Owner role cannot be assigned through the Operators panel — ownership is transferred through the **Settings → Organization** page and requires the current Owner to confirm the transfer.
+</Info>
+
+## Invite an operator
+
+To grant someone access to your organization, send them an invitation from the Operators panel.
+
+<Steps>
+  <Step title="Click Invite Operator">
+    In the Operators panel, click the **Invite Operator** button in the top-right corner of the page. The invitation dialog opens.
+  </Step>
+  <Step title="Enter the operator's email address">
+    Type the email address of the person you are inviting. You can enter multiple addresses separated by commas to send batch invitations, all at the same permission level.
+  </Step>
+  <Step title="Select a permission level">
+    Choose the appropriate permission level from the dropdown. If you are unsure, start with **Viewer** — you can always promote the permission level later without re-inviting the person.
+  </Step>
+  <Step title="Send the invitation">
+    Click **Send Invitation**. Restart Console emails an invitation link to each address. The link expires after 72 hours. The invited operator appears in the Operators list with a **Pending** badge until they accept the invitation and complete account setup.
+  </Step>
+</Steps>
+
+<Tip>
+  If an invitation expires before the operator accepts it, find the operator in the list, click the overflow menu (⋯), and select **Resend Invitation** to generate a fresh 72-hour link.
+</Tip>
+
+## Manage operator permissions
+
+You can change an operator's permission level at any time without disrupting their active session, though any in-progress action that requires a higher permission level will fail immediately upon the change taking effect.
+
+To update a permission level:
+
+1. Locate the operator in the Operators panel list.
+2. Click the overflow menu (⋯) on the right side of their row.
+3. Select **Edit Permissions**.
+4. Choose the new permission level from the dropdown and click **Save**.
+
+The change takes effect immediately and is recorded in the activity log with your name as the author.
+
+<Warning>
+  Downgrading an operator from **Admin** to a lower level removes their ability to manage other operators and change Settings. Make sure a second Admin is available before you reduce the last Admin's permissions.
+</Warning>
+
+## View operator activity logs
+
+Every action an operator takes in the console is recorded in the activity log. Use this log for auditing, debugging, and compliance reporting.
+
+To view the activity log for a specific operator:
+
+1. Click the operator's name or avatar in the Operators panel list to open their profile.
+2. Select the **Activity** tab.
+3. Browse the timestamped list of actions, each showing the action type, the resource affected, and the IP address from which the action originated.
+
+Filter the log by date range using the calendar picker at the top of the **Activity** tab, or by action type using the **Filter** dropdown. To export the log as a CSV file, click **Export** in the top-right corner of the tab.
+
+To view organization-wide activity across all operators in a single feed, click **Activity Log** in the Settings section of the sidebar. This view supports the same filtering and export options as the per-operator tab.
+
+<Note>
+  Activity logs are retained for 90 days on all plans. If your organization requires longer retention for compliance purposes, contact Restart support to discuss extended log archiving options.
+</Note>
+
+## Remove an operator
+
+Removing an operator immediately revokes their access to the console. Any sessions they have open are terminated within seconds.
+
+1. In the Operators panel, find the operator you want to remove.
+2. Click the overflow menu (⋯) on the right side of their row.
+3. Select **Remove Operator**.
+4. Confirm the action in the dialog that appears.
+
+The operator is removed from your organization's list and cannot log in to the console. Any builder configurations they authored as drafts are preserved and can be claimed by an Admin. Published configurations they authored remain in version history under their name for audit purposes.
+
+<Warning>
+  Removing an operator does not automatically revoke any API keys they created. Go to **Settings → API Keys** and rotate or delete any keys associated with the removed operator to ensure their credentials can no longer be used programmatically.
+</Warning>

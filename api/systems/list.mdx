@@ -1,0 +1,106 @@
+---
+title: "List All Systems Using the Restart Console REST API"
+sidebarTitle: "List Systems"
+description: "Retrieve a paginated list of all systems in your Restart Console account using the GET /v1/systems endpoint with optional filters."
+---
+
+The List Systems endpoint returns a paginated collection of every system registered in your Restart Console account. You can filter the results by status and control pagination with the `page` and `per_page` query parameters.
+
+## Endpoint
+
+```http
+GET /v1/systems
+```
+
+## Query Parameters
+
+<ParamField query="status" type="string">
+  Filter systems by their current status. Accepted values are `active`,
+  `inactive`, `provisioning`, and `error`. Omit this parameter to return systems
+  in all states.
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  The page number to retrieve. Starts at `1`.
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="20">
+  The number of systems to return per page. Maximum value is `100`.
+</ParamField>
+
+## Response Fields
+
+Each object in the `data` array represents a single system and includes the following fields:
+
+<ResponseField name="id" type="string">
+  The unique identifier for the system. Use this value when referencing the
+  system in other API calls.
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  The human-readable name assigned to the system.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  The current operational status of the system. One of `active`, `inactive`,
+  `provisioning`, or `error`.
+</ResponseField>
+
+<ResponseField name="region" type="string">
+  The region where the system is deployed (e.g., `us-east-1`, `eu-west-2`).
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  The ISO 8601 UTC timestamp for when the system was created.
+</ResponseField>
+
+<ResponseField name="updated_at" type="string">
+  The ISO 8601 UTC timestamp for when the system was last modified.
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash curl
+curl --request GET \
+  --url "https://api.restart.inc/v1/systems?status=active&page=1&per_page=20" \
+  --header "Authorization: Bearer <api_key>" \
+  --header "Content-Type: application/json"
+```
+
+</CodeGroup>
+
+## Example Response
+
+```json
+{
+  "data": [
+    {
+      "id": "sys_01hq8k2m3n4p5q6r7s8t9u0v",
+      "name": "Production Cluster Alpha",
+      "status": "active",
+      "region": "us-east-1",
+      "created_at": "2024-01-10T08:30:00Z",
+      "updated_at": "2024-03-15T14:22:10Z"
+    },
+    {
+      "id": "sys_02ab3c4d5e6f7g8h9i0j1k2l",
+      "name": "Staging Environment Beta",
+      "status": "active",
+      "region": "eu-west-2",
+      "created_at": "2024-02-04T11:15:00Z",
+      "updated_at": "2024-03-14T09:05:44Z"
+    }
+  ],
+  "total": 2,
+  "pages": 1,
+  "page": 1,
+  "per_page": 20
+}
+```
+
+<Note>
+  The response always includes pagination metadata (`total`, `pages`, `page`,
+  `per_page`) even when all results fit on a single page.
+</Note>

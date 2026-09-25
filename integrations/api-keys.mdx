@@ -1,0 +1,154 @@
+---
+title: "API Keys: Secure and Manage All Programmatic Access"
+sidebarTitle: "API Keys"
+description: "Create, scope, rotate, and revoke API keys in Restart Console to securely authenticate every programmatic request to the REST API."
+---
+
+API keys are the primary credential for authenticating requests to the Restart Console REST API. You generate keys directly in the console, attach a human-readable name and an access scope, and then include the key in the `Authorization` header of every API call. Keys never expire automatically, but you can rotate or revoke them at any time.
+
+## Create an API key
+
+<Steps>
+  <Step title="Open Settings">
+    In the Restart Console sidebar, click **Settings**, then select the **API Keys** tab.
+  </Step>
+  <Step title="Click New API Key">
+    Click the **New API Key** button in the top-right corner of the API Keys panel.
+  </Step>
+  <Step title="Name the key">
+    Enter a descriptive name that identifies the key's purpose or the service that will use it — for example, `ci-pipeline-read` or `monitoring-service`. Names must be unique within your account.
+  </Step>
+  <Step title="Choose a scope">
+    Select the access scope that matches the minimum permissions the key needs:
+
+    | Scope | Permissions |
+    |---|---|
+    | `read` | List and inspect systems, view logs and events |
+    | `write` | Create, update, start, and stop systems |
+    | `admin` | Full access including deleting systems and managing webhooks |
+
+  </Step>
+  <Step title="Save the key">
+    Click **Create Key**. Copy the key value immediately — Restart Console displays the full key only once. Store it in a secrets manager or environment variable before closing the dialog.
+  </Step>
+</Steps>
+
+<Warning>
+  Restart Console stores only a hashed fingerprint of your key, not the plaintext value. If you lose the key before storing it, you must rotate it to generate a new one. Treat API keys like passwords — never commit them to source control or share them in plain text.
+</Warning>
+
+## View existing keys
+
+All keys associated with your account are listed on the **Settings → API Keys** tab. For each key you can see:
+
+- **Name** — The label you assigned at creation time
+- **Scope** — The permission level granted to the key
+- **Last used** — The timestamp of the most recent authenticated request
+- **Created** — When the key was originally generated
+
+The full key value is never shown again after creation. Use the **Last used** timestamp to identify stale keys that may no longer be needed.
+
+## Rotate a key
+
+Rotating a key generates a new secret value while preserving the key's name and scope. Use rotation when a key may have been exposed or as part of a regular credential hygiene practice.
+
+<Steps>
+  <Step title="Locate the key">
+    On the **Settings → API Keys** tab, find the key you want to rotate.
+  </Step>
+  <Step title="Open the key menu">
+    Click the **⋯** (more options) icon on the key row, then select **Rotate Key**.
+  </Step>
+  <Step title="Confirm rotation">
+    Read the confirmation dialog, then click **Rotate**. The old key is immediately invalidated — any service still using it will begin receiving `401 Unauthorized` responses.
+  </Step>
+  <Step title="Copy and deploy the new key">
+    Copy the new key value shown in the dialog and update every service or secret store that uses this key before closing.
+  </Step>
+</Steps>
+
+<Note>
+  Plan rotations during a low-traffic window and update all consumers of the key before confirming. Restart Console does not offer a grace period — the old key stops working the moment you confirm rotation.
+</Note>
+
+## Revoke a key
+
+Revoking permanently deletes the key. Use revocation when a key is no longer needed or when you suspect a key has been compromised and you do not intend to replace it with a new one immediately.
+
+<Steps>
+  <Step title="Locate the key">
+    On the **Settings → API Keys** tab, find the key you want to revoke.
+  </Step>
+  <Step title="Select Revoke">
+    Click the **⋯** icon on the key row, then select **Revoke Key**.
+  </Step>
+  <Step title="Confirm revocation">
+    Type the key name to confirm, then click **Revoke**. The key is deleted immediately and cannot be recovered.
+  </Step>
+</Steps>
+
+## Use the key in API requests
+
+Include your API key as a Bearer token in the `Authorization` header of every HTTP request.
+
+```bash
+curl --request GET \
+  --url https://api.restartconsole.com/v1/systems \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+For programmatic clients, set the header once at the client level rather than per-request:
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    import httpx
+
+    client = httpx.Client(
+        base_url="https://api.restartconsole.com/v1",
+        headers={"Authorization": "Bearer YOUR_API_KEY"},
+    )
+
+    response = client.get("/systems")
+    ```
+  </Tab>
+  <Tab title="Node.js">
+    ```javascript
+    import axios from "axios";
+
+    const api = axios.create({
+      baseURL: "https://api.restartconsole.com/v1",
+      headers: { Authorization: `Bearer ${process.env.RESTART_API_KEY}` },
+    });
+
+    const response = await api.get("/systems");
+    ```
+  </Tab>
+  <Tab title="Go">
+    ```go
+    package main
+
+    import (
+        "net/http"
+        "os"
+    )
+
+    func newClient() *http.Client {
+        return &http.Client{}
+    }
+
+    func newRequest(method, path string) (*http.Request, error) {
+        req, err := http.NewRequest(method, "https://api.restartconsole.com/v1"+path, nil)
+        if err != nil {
+            return nil, err
+        }
+        req.Header.Set("Authorization", "Bearer "+os.Getenv("RESTART_API_KEY"))
+        return req, nil
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+  Store your API key in an environment variable (for example `RESTART_API_KEY`) and read it at runtime. This keeps credentials out of your source code and makes rotating keys as simple as updating the variable in your deployment environment.
+</Tip>

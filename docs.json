@@ -1,0 +1,110 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "aspen",
+  "name": "Restart Console",
+  "colors": {
+    "primary": "#ef7025",
+    "light": "#eec9bc",
+    "dark": "#4fa1ab"
+  },
+  "favicon": {
+    "light": "/images/Screenshot_6.png",
+    "dark": "/images/Screenshot_6.png"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "core-concepts"
+            ]
+          },
+          {
+            "group": "Console",
+            "pages": [
+              "console/overview",
+              "console/systems",
+              "console/builders",
+              "console/operators"
+            ]
+          },
+          {
+            "group": "Managing Systems",
+            "pages": [
+              "systems/provisioning",
+              "systems/configuration",
+              "systems/monitoring",
+              "systems/lifecycle"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "integrations/overview",
+              "integrations/webhooks",
+              "integrations/api-keys"
+            ]
+          },
+          {
+            "group": "Help",
+            "pages": [
+              "help/troubleshooting",
+              "help/faq"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api/introduction",
+              "api/authentication"
+            ]
+          },
+          {
+            "group": "Systems",
+            "pages": [
+              "api/systems/list",
+              "api/systems/create",
+              "api/systems/update",
+              "api/systems/delete"
+            ]
+          },
+          {
+            "group": "Operators & Builders",
+            "pages": [
+              "api/operators/overview",
+              "api/builders/overview"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "navbar": {
+    "links": [
+      { "label": "Support", "href": "mailto:support@restart.ng" }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Open Console",
+      "href": "https://console.restart.ng"
+    }
+  },
+  "footer": {
+    "socials": {}
+  },
+  "logo": {
+    "light": "/images/Restart-light-logo.svg",
+    "dark": "/images/Restart-dark.logo.svg",
+    "href": "https://restart.ng/"
+  }
+}

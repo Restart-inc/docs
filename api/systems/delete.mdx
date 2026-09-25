@@ -1,0 +1,77 @@
+---
+title: "Delete a System Permanently via Restart Console API"
+sidebarTitle: "Delete System"
+description: "Permanently remove a system from your Restart Console account by sending a DELETE request to the /v1/systems/{id} endpoint with its ID."
+---
+
+The Delete System endpoint permanently removes a system from your Restart Console account. You identify the system by its `id` path parameter. A successful request returns `204 No Content` with an empty response body.
+
+<Warning>
+  Deleting a system is **irreversible**. All associated configuration, logs, and
+  metadata are permanently destroyed and cannot be recovered. Ensure you have
+  backed up any critical data before proceeding.
+</Warning>
+
+## Endpoint
+
+```http
+DELETE /v1/systems/{id}
+```
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the system you want to delete. You can find this
+  value in the `id` field of any system object returned by the API.
+</ParamField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash curl
+curl --request DELETE \
+  --url https://api.restart.inc/v1/systems/sys_01hq8k2m3n4p5q6r7s8t9u0v \
+  --header "Authorization: Bearer <api_key>"
+```
+
+</CodeGroup>
+
+## Response
+
+A successful deletion returns `204 No Content`. The response body is empty.
+
+```http
+HTTP/1.1 204 No Content
+```
+
+If the system does not exist or the `id` is invalid, the API returns `404 Not Found`:
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "System not found",
+    "details": {}
+  }
+}
+```
+
+If the system is currently in the `provisioning` state, the API returns `409 Conflict` and you must wait until provisioning completes before deleting.
+
+```json
+{
+  "error": {
+    "code": "conflict",
+    "message": "System cannot be deleted while in the provisioning state",
+    "details": {
+      "current_status": "provisioning"
+    }
+  }
+}
+```
+
+<Note>
+  Deletion takes effect immediately. If you want to stop a system temporarily
+  without destroying it, update the system's status to `inactive` instead.
+</Note>

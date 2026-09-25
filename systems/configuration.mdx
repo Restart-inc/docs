@@ -1,0 +1,70 @@
+---
+title: "Configuring a Running System in the Restart Console"
+sidebarTitle: "Configuration"
+description: "Update environment parameters, resource limits, and network settings for a live system in Restart Console without reprovisioning from scratch."
+---
+
+Restart Console lets you modify a running system's configuration without tearing it down and starting over. You can adjust environment variables, resize compute resources, and change network rules — all from the system settings panel. Some changes apply immediately; others require a rolling restart, which Restart Console handles automatically.
+
+## Accessing System Settings
+
+Open the **Systems** page and click the name of the system you want to configure. On the system detail page, select the **Settings** tab. The settings panel is divided into sections: General, Environment, Resources, and Network.
+
+<Info>
+  Only users with the **Editor** or **Owner** role can modify system settings. Viewers can read configuration but cannot save changes.
+</Info>
+
+## Configuration Sections
+
+### General Settings
+
+General settings control the system's identity and startup behavior. Update the display name, startup command, and health check path here. Changes to the startup command take effect on the next restart.
+
+### Environment Parameters
+
+Add, edit, or remove environment variables under the **Environment** section. Each variable is a plain key-value pair injected into the system process at startup.
+
+<Warning>
+  Changing environment variables on a live system triggers a rolling restart to propagate the new values. During the restart, Restart Console keeps at least one instance running to serve traffic, but latency may briefly increase. Plan environment changes during a low-traffic window if your system is latency-sensitive.
+</Warning>
+
+### Resource Limits
+
+Adjust CPU and memory allocations to match your workload demands. Increasing resources on a running system initiates a rolling replacement of instances with the new size. Decreasing resources follows the same process — Restart Console drains and replaces instances one at a time.
+
+### Network Settings
+
+Network settings control how your system is reachable. Configure inbound port mappings, custom domains, TLS termination, and allowed IP ranges. DNS propagation for custom domain changes can take up to 60 seconds.
+
+## Common Configuration Parameters
+
+The following table lists the most frequently used configuration parameters, their accepted types, and what they control.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `name` | `string` | Human-readable display name for the system. Must be lowercase and hyphen-separated. |
+| `command` | `string` | Shell command used to start the system process (e.g., `node dist/server.js`). |
+| `port` | `integer` | The port your process listens on. Restart Console routes inbound traffic to this port. |
+| `instance_size` | `string` | Compute tier (`micro`, `standard-1x`, `standard-2x`, `performance-4x`). |
+| `instance_count` | `integer` | Number of running instances. Increase for horizontal scaling. |
+| `memory_limit_mb` | `integer` | Maximum RAM in megabytes allocated per instance. |
+| `cpu_shares` | `integer` | Relative CPU weight per instance (100–1024). Higher values get more CPU time. |
+| `health_check_path` | `string` | HTTP path Restart Console polls to determine instance health (e.g., `/healthz`). |
+| `health_check_interval` | `integer` | Seconds between health check requests (minimum: 10). |
+| `env` | `object` | Key-value map of environment variables injected at runtime. |
+| `allowed_ips` | `array` | List of CIDR ranges permitted to reach the system's public endpoint. |
+| `custom_domain` | `string` | A fully qualified domain name routed to this system (e.g., `api.example.com`). |
+
+## Saving and Applying Changes
+
+After editing any section, click **Save Changes** at the bottom of the settings panel. Restart Console validates your input before accepting the update — if validation fails, inline error messages highlight the affected fields.
+
+Once saved, Restart Console applies the changes according to the restart policy for each setting type:
+
+- **Immediate** — network rules and domain settings apply without a restart.
+- **Rolling restart** — environment variables and resource limits trigger an automatic rolling restart.
+- **Manual restart required** — startup command changes are staged and only take effect when you manually restart the system from the **Overview** tab.
+
+<Tip>
+  Use the **Preview Changes** button before saving to see a diff of exactly what will change. This is especially useful when editing configuration programmatically via the API or reviewing changes made by teammates.
+</Tip>

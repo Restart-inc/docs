@@ -1,0 +1,96 @@
+---
+title: "How to Monitor Your Systems in the Restart Console"
+sidebarTitle: "Monitoring"
+description: "Use Restart Console's health dashboard, metrics, alerts, and logs to observe system behavior and respond to issues before they affect your users."
+---
+
+Restart Console gives you real-time visibility into every system you operate. The monitoring tools surface the health indicators, performance metrics, and log streams you need to understand what your system is doing — and to catch problems early. You access all monitoring features from the **Monitoring** tab on any system detail page.
+
+## Monitoring Areas at a Glance
+
+<CardGroup cols={2}>
+  <Card title="Health Dashboard" icon="heart-pulse" href="#reading-status-indicators">
+    See a live status summary for all your systems in one place. Color-coded indicators show whether each system is healthy, degraded, or down. Drill into any system for a detailed breakdown by instance.
+  </Card>
+  <Card title="Metrics" icon="chart-line" href="#understanding-metrics">
+    Track uptime, request latency, error rate, and throughput over time with interactive time-series graphs. Adjust the time window from the last 5 minutes up to 90 days to spot trends and anomalies.
+  </Card>
+  <Card title="Alerts" icon="bell" href="#setting-up-alerts">
+    Configure threshold-based alerts that notify you by email, Slack, or webhook when a metric crosses a limit you define. Alerts fire and auto-resolve as conditions change.
+  </Card>
+  <Card title="Logs" icon="file-lines" href="#viewing-logs">
+    Stream live logs or search historical log output by time range, severity, or keyword. Logs from all instances of a system are aggregated into a single, unified view.
+  </Card>
+</CardGroup>
+
+## Reading Status Indicators
+
+Every system in Restart Console displays a status badge that reflects the current health of its instances:
+
+- 🟢 **Healthy** — all instances are passing health checks and serving traffic normally.
+- 🟡 **Degraded** — one or more instances are failing health checks, but the system is still serving traffic with reduced capacity.
+- 🔴 **Unhealthy** — no instances are passing health checks; the system is not serving traffic.
+- ⚪ **Stopped** — the system has been intentionally stopped and is not running.
+- 🔵 **Provisioning** — the system is being created or is restarting after a configuration change.
+
+<Info>
+  Status indicators refresh every 15 seconds in the console UI. If you need sub-second freshness, poll the `GET /systems/{id}` API endpoint directly from your own monitoring tooling.
+</Info>
+
+## Understanding Metrics
+
+Open the **Metrics** tab within a system's monitoring view to see the four primary performance signals.
+
+### Uptime
+
+Uptime measures the percentage of time at least one instance of your system was healthy and able to serve traffic during the selected period. A 100% uptime value means no health check failures occurred. Drops below 100% appear as red bands on the timeline.
+
+### Latency
+
+Latency charts show the p50, p95, and p99 response times for requests routed through Restart Console. Use the p99 line to identify tail latency that affects a small but real portion of your users.
+
+### Error Rate
+
+Error rate is the percentage of inbound requests that returned a 5xx HTTP status code. A sudden spike in error rate alongside stable latency often indicates an application-level error rather than a resource constraint.
+
+### Throughput
+
+Throughput measures requests per second handled by the system. Use throughput graphs alongside error rate to distinguish between a high-traffic incident and an application bug — high throughput with a normal error rate is a success; high throughput with a rising error rate signals a problem.
+
+<Tip>
+  Pin metrics graphs to your team's shared dashboard by clicking the **Pin** icon on any graph. Pinned graphs appear on the Restart Console home page for everyone in your organization.
+</Tip>
+
+## Setting Up Alerts
+
+Navigate to the **Alerts** tab on the system detail page to create a new alert rule.
+
+<Steps>
+  <Step title="Click 'New Alert Rule'">
+    Select **New Alert Rule** from the Alerts tab toolbar. The alert creation panel slides open on the right.
+  </Step>
+  <Step title="Choose a Metric and Threshold">
+    Pick the metric you want to alert on (uptime, latency, error rate, or throughput) and set the threshold value that should trigger the alert. For example, fire an alert when error rate exceeds `5%` for more than `2` consecutive minutes.
+  </Step>
+  <Step title="Select Notification Channels">
+    Add one or more notification channels — email addresses, a Slack webhook URL, or a custom HTTP webhook endpoint. Restart Console sends a notification when the alert fires and a separate recovery notification when the condition clears.
+  </Step>
+  <Step title="Save the Alert Rule">
+    Click **Save Rule**. The alert activates immediately and appears in the Alerts tab with a **Normal** status. Restart Console evaluates alert conditions every 60 seconds.
+  </Step>
+</Steps>
+
+## Viewing Logs
+
+Select the **Logs** tab on any system detail page to access log output from all running instances of that system. Logs are aggregated centrally — you do not need to SSH into individual instances.
+
+Use the toolbar controls to:
+
+- **Filter by severity** — show only `ERROR`, `WARN`, `INFO`, or `DEBUG` level entries.
+- **Search by keyword** — full-text search across log content in the selected time range.
+- **Set a time range** — choose a preset window (last 15 minutes, 1 hour, 24 hours) or enter custom start and end timestamps.
+- **Enable live tail** — toggle live tail to stream new log lines as they arrive, useful during active incident investigation.
+
+<Note>
+  Restart Console retains log data for **30 days** on all plans. If you need longer retention or need to export logs to an external SIEM, configure a log drain under **Settings → Integrations** to forward log streams to your preferred destination.
+</Note>

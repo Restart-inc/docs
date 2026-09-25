@@ -1,0 +1,79 @@
+---
+title: "Restart Console: Answers to Frequently Asked Questions"
+sidebarTitle: "FAQ"
+description: "Answers to the most common questions about Restart Console, including billing, system limits, regions, roles, API keys, and how to get support."
+---
+
+Find answers to the most common questions about Restart Console below. If your question is not covered here, reach out via the **Help** menu inside the console or visit the [troubleshooting guide](/help/troubleshooting) for step-by-step fixes to specific issues.
+
+## General
+
+<Accordion title="What is Restart Console?">
+  Restart Console is an operator console for building and managing systems. It gives you a single interface to provision, configure, monitor, and automate systems — whether you are running one system for internal tooling or hundreds of systems across multiple regions. You interact with Restart Console through the web UI, the REST API, or event-driven webhooks, depending on what your workflow requires.
+</Accordion>
+
+<Accordion title="What is the difference between an Operator and a Builder?">
+  **Operators** manage the runtime lifecycle of systems. As an Operator you can start, stop, restart, and monitor existing systems, view logs and events, and configure integrations such as webhooks and API keys. Operators work within the boundaries of systems that have already been defined.
+
+  **Builders** have the additional ability to define and modify system configurations — choosing resource tiers, setting environment variables, specifying startup commands, and creating new system templates. Builders shape what a system looks like; Operators keep it running.
+
+  Your role is set by your account administrator. If you need elevated permissions, ask your admin to update your role under **Settings → Team**.
+</Accordion>
+
+<Accordion title="Can I have multiple systems?">
+  Yes. You can create as many systems as your plan allows. The number of concurrent systems and the total number of systems you can provision are determined by your plan tier. You can review your current system count and limits at any time under **Settings → Limits**. If you need to run more systems than your plan supports, upgrade your plan or contact support to discuss a custom arrangement.
+</Accordion>
+
+<Accordion title="What regions are available?">
+  Restart Console currently offers systems in the following regions:
+
+  | Region | Location |
+  |---|---|
+  | `us-east-1` | Northern Virginia, USA |
+  | `us-west-2` | Oregon, USA |
+  | `eu-west-1` | Ireland, EU |
+  | `ap-southeast-1` | Singapore, APAC |
+
+  You select the region when you create a system. Choose the region closest to your users or your other infrastructure to minimise latency. Additional regions are added periodically — check the in-app announcements for updates.
+</Accordion>
+
+## Billing
+
+<Accordion title="How are systems billed?">
+  Systems are billed based on **active runtime** — the total time a system spends in the `running` state, measured to the nearest minute. You are not charged for systems in a `stopped` or `provisioning` state. Billing is calculated daily and invoiced at the end of each calendar month. You can review your current month's usage and projected costs under **Settings → Billing**.
+
+  Resource tier upgrades take effect immediately and are prorated to the minute on your next invoice.
+</Accordion>
+
+<Accordion title="Is there a free tier?">
+  Yes. Every new account includes a free tier that lets you run one system at the entry-level resource tier for up to 500 hours per month at no cost. The free tier is designed for experimentation and small personal projects. It does not include premium features such as multiple regions, high-availability configurations, or advanced monitoring.
+
+  Free-tier systems are subject to automatic shutdown after 30 consecutive minutes of inactivity to conserve resources. Upgrade to a paid plan to remove this restriction and unlock higher resource tiers and concurrent system limits.
+</Accordion>
+
+## API Keys
+
+<Accordion title="How do I reset my API key?">
+  You cannot reset an API key to its original value — Restart Console only stores a hashed fingerprint of each key after creation. To get a new working key, you need to **rotate** the existing one.
+
+  Rotating generates a new secret value for the same key entry (preserving its name and scope) while immediately invalidating the old value. To rotate a key:
+
+  1. Go to **Settings → API Keys**.
+  2. Click the **⋯** icon next to the key.
+  3. Select **Rotate Key** and confirm.
+  4. Copy the new key value before closing the dialog.
+
+  Update every service that uses the old key before confirming rotation, as the old value stops working immediately. See the [API Keys](/integrations/api-keys) page for full instructions.
+</Accordion>
+
+## Support
+
+<Accordion title="How do I contact support?">
+  You can reach the Restart Console support team through the following channels:
+
+  - **In-app help** — Click the **Help** icon in the bottom-left corner of the console to open the support panel. From there you can search the documentation, browse common issues, and submit a support ticket directly.
+  - **Email** — Send a message to [support@restartconsole.com](mailto:support@restartconsole.com). Include your account ID (found under **Settings → Account**) and any relevant `system_id` or `event_id` values to help the team investigate faster.
+  - **Status page** — Visit [status.restartconsole.com](https://status.restartconsole.com) to check for active incidents and subscribe to status updates via email or webhook.
+
+  Response times vary by plan tier. Paid plans include prioritised response times as described in the plan details under **Settings → Billing**.
+</Accordion>

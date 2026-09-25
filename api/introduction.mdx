@@ -1,0 +1,107 @@
+---
+title: "Restart Console API Overview: Requests and Responses"
+sidebarTitle: "Introduction"
+description: "Learn how the Restart Console REST API works, including base URL, authentication, request format, pagination, rate limits, and error handling."
+---
+
+The Restart Console API is a REST API that lets you programmatically manage systems, operators, and builders in your Restart Console account. All requests and responses use JSON, and every call must be authenticated with a Bearer token tied to your account.
+
+## Base URL
+
+All API endpoints are relative to the following base URL:
+
+```text
+https://api.restart.inc/v1
+```
+
+Include this prefix before every endpoint path shown in this reference. For example, the systems list endpoint is available at `https://api.restart.inc/v1/systems`.
+
+## Request Format
+
+Send all request bodies as JSON and include the `Content-Type: application/json` header on every request that carries a body (POST, PUT, PATCH).
+
+```bash
+Content-Type: application/json
+```
+
+Query parameters are passed in the URL for GET requests. Path parameters are interpolated directly into the URL path.
+
+## Authentication
+
+Every request must include a valid API key as a Bearer token in the `Authorization` header. See the [Authentication](/api/authentication) page for full details on obtaining and using API keys.
+
+```bash
+Authorization: Bearer <your_api_key>
+```
+
+## Response Format
+
+All responses are returned as JSON objects. Successful responses include the requested data at the top level or nested under a named key. HTTP status codes follow standard conventions:
+
+| Status Code | Meaning |
+|---|---|
+| `200 OK` | Request succeeded. |
+| `201 Created` | Resource was successfully created. |
+| `204 No Content` | Request succeeded with no response body. |
+| `400 Bad Request` | The request was malformed or missing required fields. |
+| `401 Unauthorized` | Authentication failed or the API key is missing. |
+| `403 Forbidden` | The API key does not have permission to perform this action. |
+| `404 Not Found` | The requested resource does not exist. |
+| `429 Too Many Requests` | You have exceeded the rate limit. |
+| `500 Internal Server Error` | An unexpected error occurred on the server. |
+
+## Pagination
+
+Endpoints that return collections support page-based pagination through the `page` and `per_page` query parameters. The response envelope includes `total` (the total number of matching records) and `pages` (the total number of pages).
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `page` | integer | `1` | The page number to retrieve. |
+| `per_page` | integer | `20` | The number of records per page (maximum `100`). |
+
+A paginated response looks like this:
+
+```json
+{
+  "data": [...],
+  "total": 84,
+  "pages": 5,
+  "page": 1,
+  "per_page": 20
+}
+```
+
+## Rate Limiting
+
+The API enforces a limit of **1,000 requests per minute** per API key. If you exceed this limit, the API returns a `429 Too Many Requests` response. The response includes a `Retry-After` header that tells you how many seconds to wait before retrying.
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 30
+```
+
+<Tip>
+  Build exponential back-off into your integration so your client automatically
+  handles transient `429` responses without manual intervention.
+</Tip>
+
+## Error Response Format
+
+When a request fails, the API returns a JSON object with a top-level `error` key containing a machine-readable `code`, a human-readable `message`, and an optional `details` object with additional context.
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "System not found",
+    "details": {}
+  }
+}
+```
+
+The `code` field is stable across API versions and safe to use in programmatic error handling. The `message` field is intended for logging and debugging.
+
+<Note>
+  All timestamps returned by the API are in ISO 8601 format and expressed in
+  UTC (e.g., `2024-03-15T12:00:00Z`).
+</Note>

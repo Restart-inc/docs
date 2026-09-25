@@ -1,0 +1,64 @@
+---
+title: "Quickstart: Provision and Monitor Your First System"
+sidebarTitle: "Quickstart"
+description: "Follow four steps to sign in, provision a new system, configure its settings, and begin monitoring — all completed in under 10 minutes."
+---
+
+This guide walks you through the fastest path to a running system on Restart Console. By the end, you'll have a live system configured and visible in your monitoring dashboard.
+
+<Note>
+  Every action in this guide is also available programmatically through the Restart API. Visit the [API Reference](/api/introduction) to manage systems, settings, and integrations directly from your own code or automation pipelines.
+</Note>
+
+<Steps>
+  <Step title="Sign in to the Console">
+    Open [app.restart.inc](https://app.restart.inc) in your browser and enter your credentials.
+
+    - If this is your first time, select **Sign up**, complete the registration form, and verify your email address.
+    - If your organization uses SSO, select **Continue with SSO** and authenticate through your identity provider.
+
+    After signing in, the Console loads your **Systems** dashboard automatically.
+  </Step>
+  <Step title="Create your first system">
+    From the **Systems** dashboard, select **New System** in the top-right corner.
+
+    1. Enter a unique **System Name**.
+    2. Choose a **Region** closest to your infrastructure.
+    3. Select a **System Type** that matches your use case.
+    4. Select **Create System**.
+
+    <Tip>
+      Pick a descriptive name you'll recognize quickly in the dashboard — you can always rename the system later from its **Settings** page.
+    </Tip>
+
+    The new system appears in your dashboard with a **Provisioning** status. It transitions to **Active** within a few seconds.
+  </Step>
+  <Step title="Configure the system settings">
+    Select your new system from the dashboard to open its detail view, then navigate to the **Settings** tab.
+
+    Review and update the following options to match your requirements:
+
+    - **Environment variables** — add any key-value pairs your system needs at runtime.
+    - **Resource limits** — set CPU and memory boundaries to control costs and performance.
+    - **Access controls** — specify which operators and builders can view or modify this system.
+
+    Select **Save Changes** when you're done. Settings take effect immediately without requiring a restart.
+
+    <Warning>
+      Changing resource limits on a running system may cause a brief interruption. Schedule limit changes during a low-traffic window when possible.
+    </Warning>
+  </Step>
+  <Step title="Monitor your system status">
+    Navigate to the **Monitoring** tab on your system's detail page to see live metrics.
+
+    - **Status** — shows whether the system is Active, Degraded, or Offline.
+    - **Uptime** — displays the rolling percentage for the last 30 days.
+    - **Event log** — lists recent state changes, errors, and integration events in chronological order.
+
+    <Info>
+      You can set up webhook notifications to push status-change events directly to your alerting tool. See [Webhooks](/integrations/webhooks) for setup instructions.
+    </Info>
+
+    Your system is now live and being monitored. From here you can connect integrations, invite teammates, or explore the API.
+  </Step>
+</Steps>

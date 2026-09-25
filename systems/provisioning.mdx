@@ -1,0 +1,94 @@
+---
+title: "How to Provision a New System in the Restart Console"
+sidebarTitle: "Provisioning"
+description: "Learn how to create and provision a new system in Restart Console, from choosing a template to confirming your deployment in minutes."
+---
+
+Provisioning a system in Restart Console sets up all the infrastructure, networking, and runtime resources your workload needs to run. Whether you use the visual console or the REST API, you follow the same logical sequence — choose a type, supply configuration, and confirm deployment.
+
+## Console-Based Provisioning
+
+Use the following steps to provision a new system directly from the Restart Console UI.
+
+<Steps>
+  <Step title="Navigate to Systems">
+    Open the Restart Console and select **Systems** from the left-hand navigation sidebar. The Systems list page shows every system currently registered to your account.
+  </Step>
+  <Step title="Click 'New System'">
+    Click the **New System** button in the top-right corner of the Systems list page. This opens the system creation wizard.
+  </Step>
+  <Step title="Choose a System Type or Template">
+    Select a system type from the available catalog. You can start from a blank system or pick a pre-configured template that matches your workload — for example, a web service, a background worker, or a scheduled job.
+
+    <Tip>
+      Templates pre-fill sensible defaults for resource limits, health checks, and environment variables. Starting from a template reduces configuration time significantly.
+    </Tip>
+  </Step>
+  <Step title="Fill In Name, Region, and Configuration">
+    Provide the following details in the configuration form:
+
+    - **Name** — a unique, lowercase identifier for the system (e.g., `payments-api`).
+    - **Region** — the geographic region where the system will be deployed (e.g., `us-east-1`).
+    - **Instance size** — the compute tier that determines CPU and memory allocation.
+    - **Environment variables** — key-value pairs injected at runtime.
+    - **Startup command** — the command used to launch your system process.
+  </Step>
+  <Step title="Review and Confirm">
+    The final screen shows a full summary of your configuration. Verify every field, then click **Confirm & Provision**. Restart Console queues the provisioning job and redirects you to the system detail page where you can track progress.
+  </Step>
+</Steps>
+
+<Note>
+  Provisioning typically completes within 60–90 seconds for standard system types. Larger instance sizes or systems with complex startup dependencies may take up to 5 minutes. The system detail page refreshes automatically and transitions to **Running** status once provisioning succeeds.
+</Note>
+
+## API-Driven Provisioning
+
+If you prefer infrastructure-as-code workflows or need to automate system creation, use the Restart Console REST API. Send a `POST` request to `/systems` with a JSON payload describing your system.
+
+### Example Provisioning Payload
+
+```json
+{
+  "name": "payments-api",
+  "region": "us-east-1",
+  "template": "web-service",
+  "instance": {
+    "size": "standard-2x",
+    "count": 2
+  },
+  "runtime": {
+    "image": "your-registry.example.com/payments-api:v1.4.2",
+    "command": "node dist/server.js",
+    "port": 3000
+  },
+  "environment": {
+    "NODE_ENV": "production",
+    "DATABASE_URL": "postgres://your-db-host.example.com:5432/payments",
+    "LOG_LEVEL": "info"
+  },
+  "health_check": {
+    "path": "/healthz",
+    "interval_seconds": 30,
+    "timeout_seconds": 5,
+    "healthy_threshold": 2,
+    "unhealthy_threshold": 3
+  }
+}
+```
+
+The API responds with a `201 Created` status and returns the full system object, including the assigned `system_id` you use to reference this system in subsequent requests.
+
+```json
+{
+  "system_id": "sys_01j8fqk2n4e5r7t9",
+  "name": "payments-api",
+  "status": "provisioning",
+  "region": "us-east-1",
+  "created_at": "2024-11-12T14:23:05Z"
+}
+```
+
+<Tip>
+  Store the `system_id` returned by the API in your deployment pipeline. You need it to query status, update configuration, and trigger lifecycle actions like stop or restart.
+</Tip>

@@ -1,0 +1,103 @@
+---
+title: "Update an Existing System with Restart Console API"
+sidebarTitle: "Update System"
+description: "Modify an existing system's name or configuration by sending a PUT request to /v1/systems/{id} with only the fields you want to change."
+---
+
+The Update System endpoint lets you modify an existing system's name and configuration object. You identify the system by its `id` path parameter and pass only the fields you want to change in the request body. A successful request returns the fully updated system object with a `200 OK` status.
+
+## Endpoint
+
+```http
+PUT /v1/systems/{id}
+```
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the system you want to update. You can find this
+  value in the `id` field of any system object returned by the API.
+</ParamField>
+
+## Request Body Parameters
+
+<ParamField body="name" type="string">
+  A new human-readable name for the system. Must be between 2 and 128
+  characters. Omit this field to leave the name unchanged.
+</ParamField>
+
+<ParamField body="config" type="object">
+  A configuration object containing the settings you want to update. The
+  provided object is merged with the system's existing configuration — keys you
+  omit are preserved as-is.
+
+  <Expandable title="config properties">
+    <ParamField body="config.autoscaling" type="boolean">
+      Enable or disable autoscaling for this system.
+    </ParamField>
+
+    <ParamField body="config.min_instances" type="integer">
+      The minimum number of instances to maintain when autoscaling is enabled.
+    </ParamField>
+
+    <ParamField body="config.max_instances" type="integer">
+      The maximum number of instances allowed when autoscaling is enabled.
+    </ParamField>
+
+    <ParamField body="config.tags" type="object">
+      A key-value map of tags. Providing a new `tags` object replaces the
+      existing tags entirely.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash curl
+curl --request PUT \
+  --url https://api.restart.inc/v1/systems/sys_01hq8k2m3n4p5q6r7s8t9u0v \
+  --header "Authorization: Bearer <api_key>" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "name": "Production Cluster Alpha — Renamed",
+    "config": {
+      "autoscaling": true,
+      "min_instances": 3,
+      "max_instances": 30
+    }
+  }'
+```
+
+</CodeGroup>
+
+## Example Response
+
+A successful request returns `200 OK` with the complete, updated system object.
+
+```json
+{
+  "id": "sys_01hq8k2m3n4p5q6r7s8t9u0v",
+  "name": "Production Cluster Alpha — Renamed",
+  "status": "active",
+  "region": "us-east-1",
+  "type": "standard",
+  "config": {
+    "autoscaling": true,
+    "min_instances": 3,
+    "max_instances": 30,
+    "tags": {
+      "env": "production",
+      "team": "platform"
+    }
+  },
+  "created_at": "2024-03-15T12:00:00Z",
+  "updated_at": "2024-03-15T15:45:22Z"
+}
+```
+
+<Tip>
+  Only fields you include in the request body are changed. You can safely send a
+  partial update without affecting fields you don't specify.
+</Tip>

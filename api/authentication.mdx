@@ -1,0 +1,92 @@
+---
+title: "Authenticating Your Restart Console REST API Requests"
+sidebarTitle: "Authentication"
+description: "Learn how to authenticate your Restart Console API requests using Bearer tokens, and how to handle 401 Unauthorized and 403 Forbidden errors."
+---
+
+Every request you make to the Restart Console API must include a valid API key. You pass the key as a Bearer token in the `Authorization` header, and the API validates it before processing your request.
+
+## Obtaining an API Key
+
+You generate and manage API keys from the Restart Console dashboard. Navigate to [Integrations → API Keys](/integrations/api-keys) to create a new key, assign it a name, and copy the secret value. Store it securely — the console does not display the full key again after initial creation.
+
+<Warning>
+  Treat your API key like a password. Never commit it to source control or
+  expose it in client-side code. Use environment variables or a secrets manager
+  to inject it at runtime.
+</Warning>
+
+## Sending the Authorization Header
+
+Include the following header in every API request, replacing `<api_key>` with your actual key:
+
+```http
+Authorization: Bearer <api_key>
+```
+
+The header value must start with the literal string `Bearer ` (with a trailing space) followed immediately by the key.
+
+## Example Request
+
+The following example shows a complete authenticated request using curl:
+
+<CodeGroup>
+
+```bash curl
+curl --request GET \
+  --url https://api.restart.inc/v1/systems \
+  --header "Authorization: Bearer <api_key>" \
+  --header "Content-Type: application/json"
+```
+
+</CodeGroup>
+
+Replace `<api_key>` with the key you copied from the [API Keys](/integrations/api-keys) page.
+
+<Tip>
+  Set your API key as a shell environment variable (e.g.,
+  `export RESTART_API_KEY=your_key`) so you can reuse `$RESTART_API_KEY` across
+  all curl commands without re-typing or exposing the value.
+</Tip>
+
+## Authentication Errors
+
+### 401 Unauthorized
+
+The API returns `401 Unauthorized` when the `Authorization` header is missing entirely or when the provided API key is invalid (e.g., revoked, malformed, or expired).
+
+```json
+{
+  "error": {
+    "code": "unauthorized",
+    "message": "Invalid or missing API key",
+    "details": {}
+  }
+}
+```
+
+If you receive this error, verify that:
+- The `Authorization` header is present in the request.
+- The header value starts with `Bearer ` followed by the key.
+- The key has not been revoked in the [API Keys](/integrations/api-keys) dashboard.
+
+### 403 Forbidden
+
+The API returns `403 Forbidden` when your API key is valid but does not have the permissions required to perform the requested action. This typically occurs when a key scoped to read-only access attempts a write operation, or when an operator-level key attempts an admin-only action.
+
+```json
+{
+  "error": {
+    "code": "forbidden",
+    "message": "Insufficient permissions to perform this action",
+    "details": {}
+  }
+}
+```
+
+If you receive this error, check the permission scopes assigned to your API key or contact your account administrator to grant the necessary access.
+
+<Note>
+  API keys are scoped at creation time. You cannot expand a key's permissions
+  after it is created — generate a new key with the required scopes instead.
+</Note>

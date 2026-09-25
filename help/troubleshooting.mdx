@@ -1,0 +1,132 @@
+---
+title: "Troubleshoot Common Restart Console Issues and Fixes"
+sidebarTitle: "Troubleshooting"
+description: "Diagnose and resolve the most common Restart Console issues, from systems stuck in Provisioning to webhook delivery failures and API rate limit errors."
+---
+
+Most issues with Restart Console fall into a small set of recognisable patterns. Work through the relevant section below to identify the root cause and apply the recommended fix. If your issue is not covered here, contact support from the **Help** menu inside the console.
+
+<Note>
+  Before troubleshooting, check the [Restart Console status page](https://status.restartconsole.com) to confirm there are no active incidents affecting the service.
+</Note>
+
+## System issues
+
+<Accordion title="System stuck in Provisioning state">
+  **Cause**
+
+  A system can remain in the `Provisioning` state if the underlying infrastructure request times out, if your account has hit its concurrent system limit, or if a transient error occurred during resource allocation.
+
+  **Resolution**
+
+  1. Wait up to **5 minutes** — provisioning occasionally takes longer than expected during high-demand periods.
+  2. Open the system detail page and check the **Events** tab for any error messages logged during provisioning.
+  3. If the Events tab shows a quota error, navigate to **Settings → Limits** to review your current usage against your plan limits.
+  4. If no error is visible after 5 minutes, click **Cancel Provisioning** to return the system to a clean state, then attempt to create the system again.
+  5. If the problem persists across multiple attempts, contact support with the `system_id` visible on the detail page.
+</Accordion>
+
+<Accordion title="Cannot connect to system">
+  **Cause**
+
+  Connection failures typically result from the system being in a non-running state, a misconfigured network or firewall rule on the client side, or a temporary disruption in the region where the system is hosted.
+
+  **Resolution**
+
+  1. Confirm the system status is `running` on the console dashboard. If it shows `stopped` or `errored`, start or restart the system before retrying.
+  2. Check that your client is targeting the correct hostname and port shown on the system detail page — these values can change after a restart.
+  3. Verify that your local firewall or network policy allows outbound connections to the system's region. See **Settings → Regions** for the IP ranges used by each region.
+  4. Try connecting from a different network to rule out a local firewall issue.
+  5. If the system is running but still unreachable, check the **Logs** tab for the system to see if the process inside the system is listening on the expected interface and port.
+</Accordion>
+
+<Accordion title="System unexpectedly stopped">
+  **Cause**
+
+  Systems stop unexpectedly due to out-of-memory (OOM) conditions, process crashes inside the system, scheduled maintenance windows, or hitting plan-level runtime limits.
+
+  **Resolution**
+
+  1. Open the **Events** tab on the system detail page. Look for a `system.errored` or `system.stopped` event and read the associated reason field.
+  2. If the reason is `oom_killed`, the system's workload exceeded its allocated memory. Upgrade the system's resource tier from the **Edit System** panel, or reduce the memory footprint of the process running inside it.
+  3. If the reason is `runtime_limit_exceeded`, your plan caps the maximum continuous runtime per system. Review your plan details under **Settings → Billing**.
+  4. If the system stopped with no reason logged, this may indicate a planned maintenance event. Check the status page and the in-app notification centre for maintenance announcements.
+  5. Enable the `system.stopped` and `system.errored` webhook events to receive immediate alerts for future incidents. See [Webhooks](/integrations/webhooks) for setup instructions.
+</Accordion>
+
+## Authentication issues
+
+<Accordion title="Receiving 401 Unauthorized errors">
+  **Cause**
+
+  A `401 Unauthorized` response means the API key is missing, malformed, or has been revoked or rotated since it was last used.
+
+  **Resolution**
+
+  1. Confirm that your request includes the `Authorization` header in the exact format `Bearer YOUR_API_KEY` — note the capital `B` and the space after `Bearer`.
+  2. Navigate to **Settings → API Keys** in the console and verify that the key you are using still appears in the list. If it has been deleted or rotated, generate a new key.
+  3. Check that your environment variable or secrets store is serving the latest key value. A stale cached value is the most common cause of sudden `401` errors after a key rotation.
+  4. If you are using a key across multiple services, confirm that only the intended service is using this specific key — accidental key sharing can lead to unexpected revocations.
+</Accordion>
+
+<Accordion title="Receiving 403 Forbidden errors">
+  **Cause**
+
+  A `403 Forbidden` response means the request was authenticated successfully but the API key does not have the permission scope required to perform the requested action.
+
+  **Resolution**
+
+  1. Review the scope of your API key under **Settings → API Keys**. The key's scope must match or exceed the permissions required by the endpoint you are calling. For example, creating a system requires the `write` scope; deleting a system requires the `admin` scope.
+  2. If you need broader access, create a new key with the correct scope rather than widening the scope of an existing restricted key. Follow the principle of least privilege — issue the narrowest scope that satisfies the use case.
+  3. Check the API reference for the specific endpoint to confirm which scope it requires.
+</Accordion>
+
+## Webhook issues
+
+<Accordion title="Webhook not receiving events">
+  **Cause**
+
+  Missing webhook deliveries are most commonly caused by an endpoint that is not publicly reachable, a TLS certificate issue, an incorrect event subscription, or deliveries that were attempted and failed silently.
+
+  **Resolution**
+
+  1. Navigate to **Settings → Webhooks**, select your webhook registration, and open the **Delivery History** tab. Check for failed delivery attempts and read the error reason for each.
+  2. Confirm that your endpoint URL is publicly accessible over HTTPS. Restart Console does not deliver to `localhost`, private IP ranges, or plain HTTP endpoints.
+  3. Verify that your TLS certificate is valid and trusted by a public certificate authority. Self-signed certificates will cause delivery failures.
+  4. Review the **Events** subscription list on your webhook registration. Confirm that the event type you expect to receive is included in your subscription.
+  5. If deliveries appear in the history as failed, use the **Replay** button next to any failed delivery to retry it manually once your endpoint is fixed.
+  6. If no deliveries appear at all, the triggering action may not have fired. Check the **Events** tab of the relevant system to confirm the event occurred.
+
+  <Tip>
+    During development, use a tool such as [Webhook.site](https://webhook.site) as a temporary public endpoint to verify that Restart Console is sending events correctly before wiring up your production handler.
+  </Tip>
+</Accordion>
+
+## API issues
+
+<Accordion title="API rate limit errors (429 Too Many Requests)">
+  **Cause**
+
+  Restart Console enforces per-key rate limits to protect API reliability. A `429 Too Many Requests` response means your key has exceeded the allowed number of requests within a sliding time window.
+
+  **Resolution**
+
+  1. Read the `Retry-After` header in the `429` response — it contains the number of seconds to wait before the rate limit window resets. Pause your request loop for at least this duration before retrying.
+  2. Implement exponential back-off with jitter in your API client rather than retrying at a fixed interval. This prevents a "thundering herd" effect when multiple instances restart simultaneously after a rate limit.
+  3. Audit your code for tight polling loops. Replace any code that calls the API on a fixed schedule to check system status with webhook subscriptions, which push state changes to you without consuming rate limit quota.
+  4. If your legitimate workload consistently requires a higher rate limit, contact support to discuss an upgraded plan with higher API quotas.
+
+  ```bash
+  # Example: read Retry-After and honour it in a shell script
+  RESPONSE=$(curl --silent --include \
+    --header 'Authorization: Bearer YOUR_API_KEY' \
+    https://api.restartconsole.com/v1/systems)
+
+  RETRY_AFTER=$(echo "$RESPONSE" | grep -i 'retry-after' | awk '{print $2}')
+
+  if [ -n "$RETRY_AFTER" ]; then
+    echo "Rate limited. Waiting ${RETRY_AFTER}s..."
+    sleep "$RETRY_AFTER"
+  fi
+  ```
+</Accordion>

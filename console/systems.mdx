@@ -1,0 +1,66 @@
+---
+title: "Systems Dashboard: View, Filter, and Manage Systems"
+sidebarTitle: "Systems"
+description: "View, filter, and act on every system in your account — check status indicators, open detail views, and run quick actions like start, stop, and restart."
+---
+
+The Systems view gives you a live, searchable inventory of every system your account can access. Whether you manage a handful of systems or hundreds, this view is designed to surface the information you need quickly and put the most common actions — start, stop, restart — within a single click. Open the Systems view by clicking **Systems** in the left navigation sidebar.
+
+## Browse and search your systems
+
+When you land on the Systems view, the dashboard renders a card or row for each system depending on your selected layout (grid or list). Each entry shows the system name, its current status, the environment it belongs to, and the last time it was updated.
+
+Use the **Search** bar at the top of the view to filter systems by name or tag in real time as you type. For more targeted filtering, open the **Filter** panel to narrow results by:
+
+- **Environment** — production, staging, development, or custom labels you have defined.
+- **Status** — show only systems in a particular state (see the table below).
+- **Owner** — filter to systems created or owned by a specific operator.
+- **Tags** — any custom tags you have applied to systems.
+
+Applied filters appear as removable chips below the search bar. Click the **×** on any chip to remove that filter, or click **Clear all** to reset the view.
+
+<Tip>
+  Save a filtered view by bookmarking the URL — Restart Console encodes active filters as query parameters, so the same URL always reopens the same filtered state.
+</Tip>
+
+## System status indicators
+
+Every system displays a color-coded status badge that reflects its current operational state. Use the table below as a reference when monitoring your fleet.
+
+| Status | Badge color | Meaning |
+|---|---|---|
+| **Running** | Green | The system is active and operating normally. |
+| **Stopped** | Gray | The system has been deliberately halted and is not consuming active resources. |
+| **Error** | Red | The system has encountered a fault and requires attention. Open the detail view for diagnostics. |
+| **Provisioning** | Blue | The system is being created or reconfigured and is not yet ready to accept traffic or commands. |
+| **Restarting** | Yellow | A restart command is in progress; the system will return to Running or Error when the operation completes. |
+| **Unknown** | Orange | The console cannot determine the system's state, usually because of a connectivity issue with the underlying infrastructure. |
+
+<Warning>
+  A system in **Error** state may still be partially running. Do not assume its resources have been released. Open the system's detail view and review the error log before taking further action.
+</Warning>
+
+## Open a system's detail view
+
+Click anywhere on a system card or row to open that system's detail view. The detail view is organized into tabs:
+
+- **Overview** — key metrics, uptime, and a summary of recent events.
+- **Logs** — a streaming log feed you can filter by severity or time range.
+- **Configuration** — the active builder configuration driving this system.
+- **Activity** — a record of every action taken on this system, including who triggered it and when.
+
+Use the breadcrumb at the top of the detail view to return to the Systems dashboard at any time.
+
+## Perform quick actions
+
+You can start, stop, or restart a system without leaving the Systems dashboard. Hover over — or, on touch devices, long-press — a system card to reveal the **Quick Actions** menu. Select the action you want:
+
+- **Start** — brings a Stopped system to Running state.
+- **Stop** — gracefully halts a Running system.
+- **Restart** — issues a sequential stop-then-start command. Use this to apply configuration changes or recover from transient errors.
+
+<Info>
+  Quick actions require at least the **Operator** permission level. If you can see the systems but the Quick Actions menu is disabled, contact your console administrator to review your permissions.
+</Info>
+
+You can also trigger the same actions from inside a system's detail view by clicking the **Actions** button in the top-right corner of the page.

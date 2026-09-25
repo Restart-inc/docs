@@ -1,0 +1,116 @@
+---
+title: "Create a New System with the Restart Console REST API"
+sidebarTitle: "Create System"
+description: "Provision a new system in your Restart Console account by sending a POST request to /v1/systems with name, region, and type fields."
+---
+
+The Create System endpoint provisions a new system in your Restart Console account. You provide the system's name, deployment region, and type in the request body, along with an optional configuration object for advanced settings. A successful request returns the newly created system with a `201 Created` status.
+
+## Endpoint
+
+```http
+POST /v1/systems
+```
+
+## Request Body Parameters
+
+<ParamField body="name" type="string" required>
+  A human-readable name for the system. Must be between 2 and 128 characters.
+  Names do not need to be unique, but using descriptive names helps you identify
+  systems in the console.
+</ParamField>
+
+<ParamField body="region" type="string" required>
+  The region where the system will be deployed. Use a valid region identifier
+  such as `us-east-1`, `us-west-2`, or `eu-west-2`. Contact support for a full
+  list of available regions.
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  The system type, which determines its capabilities and resource profile.
+  Accepted values are `standard`, `high-memory`, and `compute-optimized`.
+</ParamField>
+
+<ParamField body="config" type="object">
+  An optional configuration object for advanced system settings. Unrecognized
+  keys are ignored.
+
+  <Expandable title="config properties">
+    <ParamField body="config.autoscaling" type="boolean">
+      Enable or disable autoscaling for this system. Defaults to `false`.
+    </ParamField>
+
+    <ParamField body="config.min_instances" type="integer">
+      The minimum number of instances to maintain when autoscaling is enabled.
+      Defaults to `1`.
+    </ParamField>
+
+    <ParamField body="config.max_instances" type="integer">
+      The maximum number of instances allowed when autoscaling is enabled.
+      Defaults to `10`.
+    </ParamField>
+
+    <ParamField body="config.tags" type="object">
+      A key-value map of arbitrary tags to attach to the system for
+      organizational purposes.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash curl
+curl --request POST \
+  --url https://api.restart.inc/v1/systems \
+  --header "Authorization: Bearer <api_key>" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "name": "Production Cluster Alpha",
+    "region": "us-east-1",
+    "type": "standard",
+    "config": {
+      "autoscaling": true,
+      "min_instances": 2,
+      "max_instances": 20,
+      "tags": {
+        "env": "production",
+        "team": "platform"
+      }
+    }
+  }'
+```
+
+</CodeGroup>
+
+## Example Response
+
+A successful request returns `201 Created` with the full system object in the response body.
+
+```json
+{
+  "id": "sys_01hq8k2m3n4p5q6r7s8t9u0v",
+  "name": "Production Cluster Alpha",
+  "status": "provisioning",
+  "region": "us-east-1",
+  "type": "standard",
+  "config": {
+    "autoscaling": true,
+    "min_instances": 2,
+    "max_instances": 20,
+    "tags": {
+      "env": "production",
+      "team": "platform"
+    }
+  },
+  "created_at": "2024-03-15T12:00:00Z",
+  "updated_at": "2024-03-15T12:00:00Z"
+}
+```
+
+<Note>
+  Newly created systems start in the `provisioning` status. Poll the
+  [List Systems](/api/systems/list) endpoint or listen for webhook events to
+  detect when the status transitions to `active`.
+</Note>

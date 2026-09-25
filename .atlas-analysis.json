@@ -1,0 +1,107 @@
+{
+  "projectType": "saas",
+  "projectName": "Restart Console",
+  "projectDescription": "An operator console for building and managing the systems you run — from provisioning and configuration to monitoring and control.",
+  "theme": "aspen",
+  "primaryColor": "#ef7025",
+  "lightColor": "#eec9bc",
+  "darkColor": "#4fa1ab",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "core-concepts"
+            ]
+          },
+          {
+            "group": "Console",
+            "pages": [
+              "console/overview",
+              "console/systems",
+              "console/builders",
+              "console/operators"
+            ]
+          },
+          {
+            "group": "Managing Systems",
+            "pages": [
+              "systems/provisioning",
+              "systems/configuration",
+              "systems/monitoring",
+              "systems/lifecycle"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "integrations/overview",
+              "integrations/webhooks",
+              "integrations/api-keys"
+            ]
+          },
+          {
+            "group": "Help",
+            "pages": [
+              "help/troubleshooting",
+              "help/faq"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api/introduction",
+              "api/authentication"
+            ]
+          },
+          {
+            "group": "Systems",
+            "pages": [
+              "api/systems/list",
+              "api/systems/create",
+              "api/systems/update",
+              "api/systems/delete"
+            ]
+          },
+          {
+            "group": "Operators & Builders",
+            "pages": [
+              "api/operators/overview",
+              "api/builders/overview"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "System provisioning and lifecycle management",
+    "Operator dashboard with real-time system status",
+    "Builder tools for constructing and configuring systems",
+    "Role-based access for operators and builders",
+    "Webhook integrations for external system events",
+    "REST API for programmatic system management",
+    "Monitoring and observability for running systems",
+    "API key management for secure access"
+  ],
+  "publicApiSurface": [
+    "GET /systems — list all systems",
+    "POST /systems — provision a new system",
+    "PUT /systems/{id} — update system configuration",
+    "DELETE /systems/{id} — deprovision a system",
+    "GET /operators — list operators",
+    "GET /builders — list builders",
+    "POST /api-keys — create API key",
+    "POST /webhooks — register a webhook endpoint"
+  ]
+}

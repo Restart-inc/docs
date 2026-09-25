@@ -1,0 +1,103 @@
+---
+title: "Retrieve Builder Accounts via the Restart Console API"
+sidebarTitle: "List Builders"
+description: "Retrieve all builders in your Restart Console account using the GET /v1/builders endpoint, including their roles and contact details."
+---
+
+The List Builders endpoint returns every builder registered in your Restart Console account. Builders are the people and service accounts responsible for designing, configuring, and deploying systems — they focus on the construction and lifecycle of system components rather than day-to-day operations. Use this endpoint to audit your build team's membership, integrate with CI/CD pipelines, or automate access reviews.
+
+## Endpoint
+
+```http
+GET /v1/builders
+```
+
+## Builder Roles
+
+Every builder is assigned a role that determines what they can create and modify inside Restart Console:
+
+| Role | Description |
+|---|---|
+| `lead` | Can design and publish system blueprints, manage builder accounts, and approve deployments. |
+| `builder` | Can create and configure system components and submit deployments for review. |
+| `contributor` | Can propose changes to existing configurations but cannot create new systems or trigger deployments. |
+
+## Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  The page number to retrieve. Starts at `1`.
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="20">
+  The number of builders to return per page. Maximum value is `100`.
+</ParamField>
+
+## Response Fields
+
+Each object in the `data` array represents a single builder.
+
+<ResponseField name="id" type="string">
+  The unique identifier for the builder.
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  The builder's full name or service account name.
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  The email address associated with the builder account.
+</ResponseField>
+
+<ResponseField name="role" type="string">
+  The builder's assigned role. One of `lead`, `builder`, or `contributor`.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  The ISO 8601 UTC timestamp for when the builder account was created.
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash curl
+curl --request GET \
+  --url "https://api.restart.inc/v1/builders?page=1&per_page=20" \
+  --header "Authorization: Bearer <api_key>" \
+  --header "Content-Type: application/json"
+```
+
+</CodeGroup>
+
+## Example Response
+
+```json
+{
+  "data": [
+    {
+      "id": "bld_07yz8a9b0c1d2e3f4g5h6i7j",
+      "name": "Alex Chen",
+      "email": "alex.chen@example.com",
+      "role": "lead",
+      "created_at": "2023-10-15T08:00:00Z"
+    },
+    {
+      "id": "bld_08kl9m0n1o2p3q4r5s6t7u8v",
+      "name": "ci-deploy-bot",
+      "email": "ci-bot@example.com",
+      "role": "builder",
+      "created_at": "2024-02-11T16:45:00Z"
+    }
+  ],
+  "total": 2,
+  "pages": 1,
+  "page": 1,
+  "per_page": 20
+}
+```
+
+<Tip>
+  Service accounts used in CI/CD pipelines should be assigned the `builder`
+  role to limit their scope to deployment actions only. Reserve `lead` for human
+  accounts that need approval authority.
+</Tip>

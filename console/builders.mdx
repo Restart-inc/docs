@@ -1,0 +1,85 @@
+---
+title: "Builders Workspace: Design and Publish System Configs"
+sidebarTitle: "Builders"
+description: "Use the Builders workspace to design system blueprints, configure components, save drafts, publish versions, and promote configurations to production."
+---
+
+The Builders workspace is where the architecture of your systems takes shape before any of it goes live. A builder configuration is a versioned blueprint that defines which components make up a system, how those components connect, and what parameters control their behavior at runtime. By iterating on configurations in the Builders workspace — saving drafts, validating, and publishing — you protect your production systems from untested changes. Open the workspace by clicking **Builders** in the left navigation sidebar.
+
+## What builders do
+
+A builder configuration answers three questions about a system:
+
+- **What components are included?** — Services, databases, queues, storage volumes, and any custom resource types your organization has registered.
+- **How are they connected?** — Network paths, dependency ordering, and data flow between components.
+- **What parameters govern them?** — Environment variables, scaling rules, timeout values, and any other runtime settings exposed by each component type.
+
+When you promote a builder configuration to production, Restart Console uses it as the authoritative source of truth for provisioning and reconciling the target system.
+
+<Note>
+  Builder configurations are immutable once published. To change a published configuration, create a new draft based on it, make your edits, and publish a new version. This preserves a full audit trail of every change deployed to production.
+</Note>
+
+## Access the Builders workspace
+
+Click **Builders** in the sidebar to open the workspace. The left pane lists all existing builder configurations, grouped by system. The right pane is the configuration canvas — it shows the selected configuration's component graph and a tabbed panel for editing parameters.
+
+Use the **Search** bar at the top of the left pane to find a configuration by name. Click any configuration in the list to load it into the canvas.
+
+## Create a new builder configuration
+
+<Steps>
+  <Step title="Open the New Configuration dialog">
+    Click the **+ New Configuration** button in the top-right corner of the Builders workspace. A dialog appears asking for a configuration name and the target system this blueprint will describe. Choose an existing system from the dropdown or type a new system name to create one.
+  </Step>
+  <Step title="Add components to the canvas">
+    Inside the canvas, click **Add Component** to open the component library. Browse or search for a component type, then click it to place it on the canvas. Repeat this step for every component your system requires. Drag components to rearrange them visually — layout does not affect runtime behavior, only readability.
+  </Step>
+  <Step title="Connect components">
+    Hover over a component to reveal its connection ports. Drag from an output port on one component to an input port on another to define a dependency or data-flow relationship. The canvas draws a directed edge between the two components. Click an edge to review or delete the connection.
+  </Step>
+  <Step title="Configure parameters for each component">
+    Click a component on the canvas to open its parameter panel on the right side of the workspace. Fill in required fields — shown with a red asterisk — and adjust optional parameters as needed. Parameters marked **runtime-overridable** can be changed on a deployed system without republishing the configuration.
+  </Step>
+  <Step title="Validate the configuration">
+    Click **Validate** in the toolbar. The workspace checks for missing required parameters, disconnected mandatory ports, and schema violations. Any issues appear as inline markers on the canvas and a summary list in the **Validation** tab of the right panel. Resolve all errors before proceeding; warnings are advisory.
+  </Step>
+  <Step title="Save as draft or publish">
+    Once validation passes (no errors), you have two options:
+    - Click **Save Draft** to store the configuration without making it available for promotion. Drafts are private to the author until published.
+    - Click **Publish** to lock the configuration as a numbered version and make it available for promotion to production.
+  </Step>
+</Steps>
+
+## Save drafts vs. publish
+
+Drafts let you work incrementally without affecting anything that is live. Save a draft as often as you like — there is no limit on draft saves, and they do not consume a version number. Drafts are visible only to the operator who created them unless that operator explicitly shares the draft link with a colleague.
+
+Publishing freezes the configuration into a versioned snapshot. Every published version is listed in the configuration's version history, along with the author's name, a timestamp, and an optional change note you can add at publish time. You cannot edit a published version; you can only branch from it into a new draft.
+
+<Tip>
+  Add a concise change note every time you publish. The version history becomes significantly more useful when each entry explains the intent of the change rather than leaving reviewers to diff the configurations manually.
+</Tip>
+
+## Promote a builder configuration to production
+
+Promotion is the act of telling Restart Console to reconcile a target system against a specific published configuration version.
+
+<Steps>
+  <Step title="Open the configuration's version history">
+    In the Builders workspace, select the configuration you want to promote. Click the **Versions** tab in the right panel to see all published versions listed in reverse chronological order.
+  </Step>
+  <Step title="Select the version to promote">
+    Click the version you want to promote. A summary panel expands showing the component count, parameter diff from the currently active production version, and any validation notes recorded at publish time.
+  </Step>
+  <Step title="Initiate promotion">
+    Click **Promote to Production**. A confirmation dialog summarizes the changes that will be applied to the live system, including which components will be added, modified, or removed. Review the diff carefully.
+  </Step>
+  <Step title="Confirm and monitor">
+    Click **Confirm Promotion**. Restart Console begins reconciling the target system. You are redirected to the Systems detail view for that system, where the status badge changes to **Provisioning** while the promotion is in progress. The promotion completes when the badge returns to **Running**.
+  </Step>
+</Steps>
+
+<Warning>
+  Promoting a configuration that removes components from a running system will cause those components to be deprovisioned. Verify that no active traffic or data pipelines depend on the components being removed before you confirm the promotion.
+</Warning>

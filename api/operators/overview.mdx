@@ -1,0 +1,102 @@
+---
+title: "Retrieve Operator Accounts via Restart Console API"
+sidebarTitle: "List Operators"
+description: "Retrieve all operators in your Restart Console account using the GET /v1/operators endpoint, including their roles and contact details."
+---
+
+The List Operators endpoint returns every operator registered in your Restart Console account. Operators are the people responsible for running, monitoring, and maintaining systems — they have elevated access to perform operational tasks. Use this endpoint to audit membership, build integrations that route alerts by role, or synchronize your directory with external systems.
+
+## Endpoint
+
+```http
+GET /v1/operators
+```
+
+## Operator Roles
+
+Every operator is assigned a role that controls what actions they can perform inside Restart Console:
+
+| Role | Description |
+|---|---|
+| `admin` | Full access to all systems and account settings, including billing and user management. |
+| `operator` | Can manage and interact with systems but cannot modify account-level settings. |
+| `viewer` | Read-only access to systems and dashboards. Cannot make changes. |
+
+## Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  The page number to retrieve. Starts at `1`.
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="20">
+  The number of operators to return per page. Maximum value is `100`.
+</ParamField>
+
+## Response Fields
+
+Each object in the `data` array represents a single operator.
+
+<ResponseField name="id" type="string">
+  The unique identifier for the operator.
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  The operator's full name.
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  The operator's email address.
+</ResponseField>
+
+<ResponseField name="role" type="string">
+  The operator's assigned role. One of `admin`, `operator`, or `viewer`.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  The ISO 8601 UTC timestamp for when the operator account was created.
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash curl
+curl --request GET \
+  --url "https://api.restart.inc/v1/operators?page=1&per_page=20" \
+  --header "Authorization: Bearer <api_key>" \
+  --header "Content-Type: application/json"
+```
+
+</CodeGroup>
+
+## Example Response
+
+```json
+{
+  "data": [
+    {
+      "id": "opr_03mn4p5q6r7s8t9u0v1w2x3y",
+      "name": "Jordan Rivera",
+      "email": "jordan.rivera@example.com",
+      "role": "admin",
+      "created_at": "2023-11-01T09:00:00Z"
+    },
+    {
+      "id": "opr_04ab5c6d7e8f9g0h1i2j3k4l",
+      "name": "Sam Patel",
+      "email": "sam.patel@example.com",
+      "role": "operator",
+      "created_at": "2024-01-22T14:30:00Z"
+    }
+  ],
+  "total": 2,
+  "pages": 1,
+  "page": 1,
+  "per_page": 20
+}
+```
+
+<Note>
+  Only API keys with `admin` or `operator` role permissions can call this
+  endpoint. Keys scoped to `viewer` receive a `403 Forbidden` response.
+</Note>

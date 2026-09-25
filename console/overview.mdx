@@ -1,0 +1,66 @@
+---
+title: "Restart Console Overview: Tour the Main UI Sections"
+sidebarTitle: "Overview"
+description: "Tour the Restart Console interface — sidebar navigation, Systems dashboard, Builders workspace, Operators panel, and Settings — all in one place."
+---
+
+The Restart Console is your central command center for building, deploying, and monitoring systems. Every major workflow — from designing blueprints to managing the people who run your infrastructure — lives inside a focused, purpose-built area of the UI. This page walks you through each section so you can orient yourself quickly and start working with confidence.
+
+<Note>
+  Screenshots in this section show the default light-mode layout. Your console may appear slightly different depending on your organization's theme settings or active feature flags.
+</Note>
+
+## Navigation sidebar
+
+The collapsible sidebar on the left edge of the console is your primary way to move between areas. It lists five top-level destinations: **Systems**, **Builders**, **Operators**, **Settings**, and a persistent **Search** shortcut at the top. Click any item to navigate directly to that section. Collapse the sidebar by clicking the arrow icon at the bottom-left to gain horizontal screen space when working in dense views like the Builders workspace.
+
+## Systems dashboard
+
+The Systems dashboard is the first screen you see after logging in. It displays every system your account can access, grouped by status. From here you can scan the health of your fleet at a glance, filter by environment or tag, and jump into any individual system's detail view. A persistent status bar at the top of the dashboard shows aggregate counts — how many systems are running, stopped, or in an error state — so you always have a live pulse on your infrastructure.
+
+## Builders workspace
+
+The Builders workspace is where you design and iterate on system blueprints before they ever touch production. Each builder configuration defines the components, parameters, and dependencies that make up a system. The workspace provides a structured form-and-canvas interface, a draft/publish lifecycle to protect live systems, and a one-click promotion path to push a validated configuration to production.
+
+## Operators panel
+
+The Operators panel controls who can interact with your systems and at what level of authority. You invite operators by email, assign them a permission level, and revoke access at any time. An activity log records every action an operator takes, giving you a clear audit trail for compliance and debugging.
+
+## Settings
+
+The Settings section covers account-level configuration: organization name and billing details, API keys and webhook endpoints, notification preferences, and single sign-on (SSO) setup. Changes you make here apply across the entire console for your organization.
+
+---
+
+## Explore the console
+
+<CardGroup cols={2}>
+  <Card
+    title="Systems"
+    icon="server"
+    href="/console/systems"
+  >
+    View, filter, and act on every system in your account from the Systems dashboard.
+  </Card>
+  <Card
+    title="Builders"
+    icon="wrench"
+    href="/console/builders"
+  >
+    Design system blueprints, configure components, and promote configurations to production.
+  </Card>
+  <Card
+    title="Operators"
+    icon="users"
+    href="/console/operators"
+  >
+    Invite operators, manage permission levels, and review activity logs.
+  </Card>
+  <Card
+    title="API Keys"
+    icon="key"
+    href="/integrations/api-keys"
+  >
+    Create and manage API keys for secure programmatic access to your systems.
+  </Card>
+</CardGroup>
